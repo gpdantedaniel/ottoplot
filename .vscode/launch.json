@@ -13,16 +13,16 @@
       "port": 9222,
       "request": "attach",
       "type": "chrome",
-      "webRoot": "${workspaceFolder}/frontend"
+      "webRoot": "${workspaceFolder}"
     },
     {
       "name": "Main",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
       "windows": {
-        "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron.cmd"
+        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
       },
       "args": [".", "--remote-debugging-port=9222"],
       "outputCapture": "std",
