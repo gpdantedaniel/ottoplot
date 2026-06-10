@@ -8,8 +8,8 @@ function App() {
     <>
       <img alt="logo" className="logo" src={electronLogo} />
       <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        It's pretty fucking fast
+      <div className="text-red-500 text-5xl">
+        It's pretty fucking FAST
       </div>
       <p className="tip">
         Please try pressing <code>F12</code> to open the devTool
