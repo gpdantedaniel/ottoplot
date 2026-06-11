@@ -1,33 +1,30 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from '@/components/ui/button'
 
 function App() {
   const ipcHandle = () => window.electron.ipcRenderer.send('ping')
 
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text-red-500 text-5xl">
-        It's pretty fucking FAST
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
+    <div className="bg-red-500 w-full h-full flex flex-row">
+
+      <div className="flex-auto bg-blue-500 flex flex-col">
+        <div className="flex-2">
+          Workspace 1
         </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
+        <div className="flex-1 bg-red-500">
+          Workspace 2
         </div>
       </div>
-      <Versions></Versions>
-    </>
+      <div className="w-md bg-green-500">
+        Side Panel
+      </div>
+    </div>
   )
 }
 
