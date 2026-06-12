@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/jetbrains-mono";
-@import "@fontsource-variable/geist";
 @import "@fontsource-variable/ibm-plex-sans";
 
 html, body {
@@ -67,7 +66,7 @@ body {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 :root {
@@ -148,5 +147,8 @@ body {
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3 {
+    @apply font-heading;
   }
 }
