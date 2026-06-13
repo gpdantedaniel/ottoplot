@@ -10,17 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import App from './App'
 
 createRoot(document.getElementById('root')).render(
-
-    
-
   <StrictMode>
-    <TooltipProvider>
-      <SidebarProvider>
-        <AppSidebar />
-          <SidebarTrigger />
-          <App />
-      </SidebarProvider>
-     
-    </TooltipProvider>
+    <App />
   </StrictMode>
 )
