@@ -2,6 +2,25 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import OpenAI from 'openai'
+
+const client = new OpenAI({
+  baseURL: 'http://localhost:11434/v1',
+  apiKey: 'ollama',
+});
+
+async function handleGenerate(event, prompt) {
+  console.log('Received prompt:', prompt);
+  console.log('Querying model...');
+
+  const completion = await client.chat.completions.create({
+    model: 'qwen3.6:27b',
+    messages: [{role: 'user', content: prompt}]
+  })
+
+  const model_output = completion.choices[0].message.content;  
+  return model_output
+}
 
 function createWindow() {
   // Create the browser window.
@@ -13,9 +32,10 @@ function createWindow() {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      
       sandbox: false
     }
-  })
+  })  
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -49,8 +69,19 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+
+  /*--- IPC handlers ---*/
+
+  
+
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Handles generation requests - shows prompt for now
+  ipcMain.handle('generate', handleGenerate);
+
+
 
   createWindow()
 
