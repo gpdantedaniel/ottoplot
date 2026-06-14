@@ -1,25 +1,69 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import OpenAI from 'openai'
+import { spawn } from 'child_process'
+import * as fs from 'node:fs'
 
 const client = new OpenAI({
   baseURL: 'http://localhost:11434/v1',
   apiKey: 'ollama',
 });
 
+const executePython = (code) => {
+  return new Promise((resolve, reject) => {
+    const worker = spawn("../python/.venv/bin/python", ["../python/runtime.py"])
+    let stdout = "";
+    let stderr = "";
+
+    worker.stdout.on("data", data => {
+      stdout += data.toString();
+    });
+
+    worker.stderr.on("data", data => {
+      stderr += data.toString();
+    });
+
+    worker.on("close", () => {
+      if (stderr.length > 0) {
+          reject(stderr);
+          return;
+      }
+      resolve(JSON.parse(stdout));
+    });
+
+    worker.stdin.write(JSON.stringify({
+      id: crypto.randomUUID(),
+      code: code
+    }));
+
+    worker.stdin.end();
+  })
+}
+
 async function handleGenerate(event, prompt) {
   console.log('Received prompt:', prompt);
   console.log('Querying model...');
 
+  /*
   const completion = await client.chat.completions.create({
     model: 'qwen3.6:27b',
     messages: [{role: 'user', content: prompt}]
   })
 
-  const model_output = completion.choices[0].message.content;  
-  return model_output
+  // Should somehow restrict to code generation
+  const code = completion.choices[0].message.content;
+  */
+
+  // Keep this around for testing purposes
+  const code = "print('Hello world')"
+
+  console.log("code: ", code)
+  const result = await executePython(code)
+
+  console.log("Execution result:", result);
+  return result
 }
 
 function createWindow() {
@@ -80,6 +124,30 @@ app.whenReady().then(() => {
 
   // Handles generation requests - shows prompt for now
   ipcMain.handle('generate', handleGenerate);
+
+  ipcMain.handle("select-data-file", async () => {
+    const result = await dialog.showOpenDialog({
+      title: "Select Data File",
+      properties: ["openFile"],
+      filters: [{
+        name: "Data Files",
+        extensions: ["csv", "json", "xlsx"]
+      }]
+    });
+
+    if (result.canceled) { return null }
+
+    const sourcePath = result.filePaths[0];
+    const destination = path.join("../workspace", "inputs", path.basename(sourcePath));
+    fs.copyFileSync(sourcePath, destination);
+
+    return {
+      fileName: path.basename(sourcePath),
+      workspacePath: destination
+    };
+  }
+);
+  
 
 
 

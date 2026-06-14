@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-contextBridge.exposeInMainWorld('electron',{
-  generate: (prompt) => ipcRenderer.invoke('generate', prompt)
+contextBridge.exposeInMainWorld('api',{
+  generate: (prompt) => ipcRenderer.invoke('generate', prompt),
+  selectDataFile: () => ipcRenderer.invoke("select-data-file")
 })
 
 /*

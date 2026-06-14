@@ -15,9 +15,36 @@ function App() {
   console.log(window.api);
 
   const [generationPrompt, setGenerationPrompt] = useState("");
+  // const [selectedFile, setSelectedFile] = useState(null);
+
+  /*
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    console.log(file);
+    if (!file) { return }
+
+    // console.log("Name:", file.name);
+    // console.log("Size:", file.size);
+    // console.log("Type:", file.type);
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    await window.api.uploadFile({
+      name: file.name,
+      buffer: Array.from(new Uint8Array(arrayBuffer))
+    });
+  };
+  */
+
+  const handleSelectFile = async () => {
+    const result = await window.api.selectDataFile();
+    if (!result) { return; }
+    console.log(result);
+  };
+
 
   const generate = async () => {
-    const model_output = await window.electron.generate(generationPrompt)
+    const model_output = await window.api.generate(generationPrompt)
     console.log('model_output:', model_output);
   }
 
@@ -26,7 +53,7 @@ function App() {
       <div className="border-b border-l py-4 px-8 font-bold flex flex-row gap-2 items-center">
         <SquareFunction size={28}/>
         <h1 className="text-xl">
-          PIPE DESIGN
+          FUNCTION DESIGN
         </h1>
       </div>
       <div className="flex-1 flex flex-row">
@@ -34,9 +61,20 @@ function App() {
           <h2 className="text-lg">DESIGN AREA</h2>
 
           <Field>
-            <FieldLabel htmlFor="picture">Upload Data</FieldLabel>
-            <Input id="picture" type="file" />
-            <FieldDescription>Select a file of data to upload</FieldDescription>
+            <FieldLabel>
+              Upload Data
+            </FieldLabel>
+
+            <Button
+              type="button"
+              onClick={handleSelectFile}
+            >
+              Select File
+            </Button>
+
+            <FieldDescription>
+              Select a CSV, JSON, or Excel file
+            </FieldDescription>
           </Field>
 
           <Field>
@@ -54,7 +92,7 @@ function App() {
         <div className="flex-2 p-8 border-l flex flex-col gap-3">
 
             <div className="flex-1 flex flex-col items-start gap-3">
-              <h2 className="text-lg">MAIN OUTPUT</h2>
+              <h2 className="text-lg">OUTPUT</h2>
             </div>
             <Separator/>
             <div className="flex-1 flex flex-col items-start gap-3">
