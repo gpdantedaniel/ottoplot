@@ -1,24 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
 contextBridge.exposeInMainWorld('api',{
-  generate: (prompt) => ipcRenderer.invoke('generate', prompt),
+  generateFunction: (prompt) => ipcRenderer.invoke('generate-function', prompt),
   selectDataFile: () => ipcRenderer.invoke("select-data-file")
 })
-
-/*
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  window.electron = electronAPI
-  window.api = api
-}
-*/
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.

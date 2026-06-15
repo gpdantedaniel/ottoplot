@@ -3,7 +3,7 @@ import { useState, useEffect} from 'react'
 import { Button } from '@/components/ui/button'
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { SquareFunction } from "lucide-react"
+import { SquareFunction, Upload } from "lucide-react"
 import {Field, FieldDescription, FieldLabel} from "@/components/ui/field"
 
 import { Input } from "@/components/ui/input"
@@ -43,9 +43,9 @@ function App() {
   };
 
 
-  const generate = async () => {
-    const model_output = await window.api.generate(generationPrompt)
-    console.log('model_output:', model_output);
+  const generateFunction = async () => {
+    const modelOutput = await window.api.generateFunction(generationPrompt)
+    console.log('model_output:', modelOutput);
   }
 
   return (
@@ -60,15 +60,13 @@ function App() {
         <div className="flex-1 p-8 border-l flex flex-col items-start gap-3">
           <h2 className="text-lg">DESIGN AREA</h2>
 
-          <Field>
+          <Field className="flex flex-col items-start">
             <FieldLabel>
               Upload Data
             </FieldLabel>
 
-            <Button
-              type="button"
-              onClick={handleSelectFile}
-            >
+            <Button type="button" onClick={handleSelectFile}>
+              <Upload/>
               Select File
             </Button>
 
@@ -87,7 +85,7 @@ function App() {
             />
           </Field>
 
-          <Button onClick={generate}>Generate</Button>
+          <Button onClick={generateFunction}>Generate</Button>
         </div>
         <div className="flex-2 p-8 border-l flex flex-col gap-3">
 

@@ -1,70 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-import OpenAI from 'openai'
-import { spawn } from 'child_process'
-import * as fs from 'node:fs'
 
-const client = new OpenAI({
-  baseURL: 'http://localhost:11434/v1',
-  apiKey: 'ollama',
-});
-
-const executePython = (code) => {
-  return new Promise((resolve, reject) => {
-    const worker = spawn("../python/.venv/bin/python", ["../python/runtime.py"])
-    let stdout = "";
-    let stderr = "";
-
-    worker.stdout.on("data", data => {
-      stdout += data.toString();
-    });
-
-    worker.stderr.on("data", data => {
-      stderr += data.toString();
-    });
-
-    worker.on("close", () => {
-      if (stderr.length > 0) {
-          reject(stderr);
-          return;
-      }
-      resolve(JSON.parse(stdout));
-    });
-
-    worker.stdin.write(JSON.stringify({
-      id: crypto.randomUUID(),
-      code: code
-    }));
-
-    worker.stdin.end();
-  })
-}
-
-async function handleGenerate(event, prompt) {
-  console.log('Received prompt:', prompt);
-  console.log('Querying model...');
-
-  /*
-  const completion = await client.chat.completions.create({
-    model: 'qwen3.6:27b',
-    messages: [{role: 'user', content: prompt}]
-  })
-
-  // Should somehow restrict to code generation
-  const code = completion.choices[0].message.content;
-  */
-
-  // Keep this around for testing purposes
-  const code = "print('Hello world')"
-
-  console.log("code: ", code)
-  const result = await executePython(code)
-
-  console.log("Execution result:", result);
-  return result
-}
+// IPC handlers and utilities
+import { handleSelectDataFile } from './ipc/handleSelectDataFile'
+import { handleGenerateFunction } from './ipc/handleGenerateFunction'
 
 function createWindow() {
   // Create the browser window.
@@ -73,10 +13,8 @@ function createWindow() {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      
       sandbox: false
     }
   })  
@@ -99,9 +37,7 @@ function createWindow() {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -113,43 +49,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-
-  /*--- IPC handlers ---*/
-
-  
-
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
   // Handles generation requests - shows prompt for now
-  ipcMain.handle('generate', handleGenerate);
-
-  ipcMain.handle("select-data-file", async () => {
-    const result = await dialog.showOpenDialog({
-      title: "Select Data File",
-      properties: ["openFile"],
-      filters: [{
-        name: "Data Files",
-        extensions: ["csv", "json", "xlsx"]
-      }]
-    });
-
-    if (result.canceled) { return null }
-
-    const sourcePath = result.filePaths[0];
-    const destination = path.join("../workspace", "inputs", path.basename(sourcePath));
-    fs.copyFileSync(sourcePath, destination);
-
-    return {
-      fileName: path.basename(sourcePath),
-      workspacePath: destination
-    };
-  }
-);
-  
-
-
+  ipcMain.handle('generate-function', handleGenerateFunction);
+  ipcMain.handle("select-data-file", handleSelectDataFile);
 
   createWindow()
 
@@ -160,14 +62,9 @@ app.whenReady().then(() => {
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
