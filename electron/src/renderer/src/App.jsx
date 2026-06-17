@@ -3,7 +3,7 @@ import { useState, useEffect} from 'react'
 import { Button } from '@/components/ui/button'
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { SquareFunction, Upload } from "lucide-react"
+import { FileSignature, SquareFunction, Upload } from "lucide-react"
 import {Field, FieldDescription, FieldLabel} from "@/components/ui/field"
 
 import { Input } from "@/components/ui/input"
@@ -11,11 +11,8 @@ import { Input } from "@/components/ui/input"
 import Plot from 'react-plotly.js';
 
 function App() {
-
-  console.log(window.api);
-
   const [generationPrompt, setGenerationPrompt] = useState("");
-  // const [selectedFile, setSelectedFile] = useState(null);
+  const [plotData, setPlotData] = useState(null)
 
   /*
   const handleFileChange = async (event) => {
@@ -46,6 +43,9 @@ function App() {
   const generateFunction = async () => {
     const modelOutput = await window.api.generateFunction(generationPrompt)
     console.log('model_output:', modelOutput);
+
+    // Assuming that it is well formatted..
+    setPlotData(JSON.parse(modelOutput.stdout))
   }
 
   return (
@@ -91,6 +91,29 @@ function App() {
 
             <div className="flex-1 flex flex-col items-start gap-3">
               <h2 className="text-lg">OUTPUT</h2>
+              { plotData ? (
+                  <Plot
+                    data={plotData.data}
+                    layout={{
+                      ...plotData.layout,
+                      autosize: true,
+                      width: undefined,
+                      height: undefined,
+                    }}
+                    useResizeHandler
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                    }}
+                    config={FileSignature.config}
+                    className=""
+                  />
+                ) : (
+                  <div>
+                    Awaiting data...
+                  </div>
+                )
+              }
             </div>
             <Separator/>
             <div className="flex-1 flex flex-col items-start gap-3">
