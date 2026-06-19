@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { FileSignature, SquareFunction, Upload } from "lucide-react"
-import {Field, FieldDescription, FieldLabel} from "@/components/ui/field"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 import { Input } from "@/components/ui/input"
 
@@ -88,37 +89,48 @@ function App() {
           <Button onClick={generateFunction}>Generate</Button>
         </div>
         <div className="flex-2 p-8 border-l flex flex-col gap-3">
+            <ResizablePanelGroup orientation="vertical">
+              <ResizablePanel defaultSize="75%">
 
-            <div className="flex-1 flex flex-col items-start gap-3">
-              <h2 className="text-lg">OUTPUT</h2>
-              { plotData ? (
-                  <Plot
-                    data={plotData.data}
-                    layout={{
-                      ...plotData.layout,
-                      autosize: true,
-                      width: undefined,
-                      height: undefined,
-                    }}
-                    useResizeHandler
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                    }}
-                    config={FileSignature.config}
-                    className=""
-                  />
-                ) : (
-                  <div>
-                    Awaiting data...
-                  </div>
-                )
-              }
-            </div>
-            <Separator/>
-            <div className="flex-1 flex flex-col items-start gap-3">
-              <h2 className="text-lg">DEBUGGING</h2>
-            </div>
+                <div className="flex-1 flex flex-col items-start gap-3 py-4">
+                  <h2 className="text-lg">OUTPUT</h2>
+                  { plotData ? (
+                      <Plot
+                        data={plotData.data}
+                        layout={{
+                          ...plotData.layout,
+                          autosize: true,
+                          responsive: true,
+
+                        }}
+                        useResizeHandler
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        config={FileSignature.config}
+                        className="h-full flex-1 h-[800px]"
+                      />
+                    ) : (
+                      <div>
+                        Awaiting data...
+                      </div>
+                    )
+                  }
+                </div>
+
+
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize="25%">
+
+                <div className="flex-1 flex flex-col items-start gap-3 py-4">
+                  <h2 className="text-lg">DEBUGGING</h2>
+                </div>
+                
+              </ResizablePanel>
+            </ResizablePanelGroup>
+
       </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
+import 'dotenv/config'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 // IPC handlers and utilities
@@ -9,8 +10,8 @@ import { handleGenerateFunction } from './ipc/handleGenerateFunction'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 800,
+    height: 600,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {

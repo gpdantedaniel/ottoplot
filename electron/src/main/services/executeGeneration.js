@@ -2,12 +2,12 @@ import OpenAI from 'openai'
 
 export const executeGeneration = async (prompt) => {
     const client = new OpenAI({
-        baseURL: 'http://localhost:11434/v1',
-        apiKey: 'ollama',
+        baseURL: 'https://api.deepseek.com',
+        apiKey: process.env.DEEPSEEK_API_KEY
     });
 
     const completion = await client.chat.completions.create({
-        model: 'qwen3.6:27b',
+        model: 'deepseek-v4-flash',
         messages: [{role: 'user', content: prompt}]
     })
 
