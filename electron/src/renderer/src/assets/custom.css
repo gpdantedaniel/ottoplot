@@ -1,0 +1,11 @@
+.code-block {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.5rem;
+  background: hsl(var(--muted));
+}

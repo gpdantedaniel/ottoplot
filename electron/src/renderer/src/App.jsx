@@ -5,11 +5,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { FileSignature, SquareFunction, Upload } from "lucide-react"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
 import { CsvTableViewer } from './components/csv-table-viewer'
+import { PythonCodeBlock } from './components/python-code-block'
 
 function App() {
   const [generationPrompt, setGenerationPrompt] = useState("");
@@ -92,77 +94,83 @@ function App() {
         </div>
         <div className="flex-2 p-8 border-l flex flex-col gap-3">
             <ResizablePanelGroup orientation="vertical">
-              <ResizablePanel defaultSize="60%">
+              <ResizablePanel defaultSize="90%">
 
-                <div className="flex-1 flex flex-col items-start gap-3 py-4">
-                  <h2 className="text-lg">PLOTTING</h2>
-                  { executionOutput ? (
-                    <>
-                      <p>
-                        Execution successful!
-                      </p>
+                <div className="">
+                  
+                  <Tabs defaultValue="overview flex flex-col gap-3">
+                    
+                    <TabsList variant="line" className="px-0">
+                      <TabsTrigger value="results" className="text-lg pl-0"><h2>RESULTS</h2></TabsTrigger>
+                      <TabsTrigger value="graphs" className="text-lg"><h2>GRAPHS</h2></TabsTrigger>
+                      <TabsTrigger value="tables" className="text-lg"><h2>TABLES</h2></TabsTrigger>
+                      <TabsTrigger value="code" className="text-lg"><h2>CODE</h2></TabsTrigger>
 
-                      <div>
-                          {images.map((image) => (
-                            <div key={image.id}>
-                              <img
-                                src={image.url}
-                                alt={image.name}
-                                width={"600px"}
-                              />
+                   
+
+                    </TabsList>
+                       <TabsContent value="results" className="flex-1">
+                        <div>
+                          { executionOutput ? (
+                            <div className="text-base">
+                              {executionOutput.stdout.split("\n").map((line, index) => (
+                                <p key={index}>&gt; {line}</p>
+                              ))}
                             </div>
-                          ))}
+                          ) : (
+                            <p>&gt; Awaiting logs...</p>
+                          )}
                         </div>
-                        </>
-                      /*
-                      <Plot
-                        data={JSON.parse(executionOutput.artifacts[0].payload)}
-                        layout={{
-                          ...JSON.parse(executionOutput.artifacts[0].payload).layout,
-                          autosize: true,
-                          responsive: true,
+                      </TabsContent>
 
-                        }}
-                        useResizeHandler
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                        }}
-                        className="h-full flex-1 h-[800px]"
-                      />
-                      */
-                    ) : (
-                      <div>
-                        &gt; Awaiting plots...
-                      </div>
+                      <TabsContent value="graphs">
+                        { executionOutput ? (
+                            <div>
+                              {images.map((image) => (
+                                <div key={image.id}>
+                                  <img
+                                    src={image.url}
+                                    alt={image.name}
+                                    width={"500px"}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div>
+                              &gt; Awaiting plots...
+                            </div>
 
-                    )
-                  }
+                          )
+                        }
 
-                  <h2 className="text-lg">TABLES</h2>
+                      </TabsContent>
 
-                  <CsvTableViewer refreshKey={tablesRefreshKey} />
+                      <TabsContent value="tables">
+                        <CsvTableViewer refreshKey={tablesRefreshKey} />
+                      </TabsContent>
+
+                      <TabsContent value="code">
+                        { executionOutput ? (
+                          <PythonCodeBlock code={executionOutput.code} />
+                        ) : (
+                          <></>
+                        )}
+                      </TabsContent>
+                  </Tabs>
+                  
+
+                  
+
+
 
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize="40%">
+              <ResizablePanel defaultSize="10%">
 
                 <div className="flex-1 flex flex-col items-start gap-3 py-4">
-                  <h2 className="text-lg">LOGS</h2>
-                  
-                  { executionOutput ? (
-                    <div>
-                      {executionOutput.stdout.split("\n").map((line, index) => (
-                        <p key={index}>&gt; {line}</p>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>&gt; Awaiting logs...</p>
-                  )}
-                  
-
-
+                  <h2 className="text-lg">MISCELLANEOUS</h2>
                 </div>
                 
               </ResizablePanel>

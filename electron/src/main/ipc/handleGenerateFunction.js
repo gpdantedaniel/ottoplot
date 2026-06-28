@@ -13,13 +13,13 @@ export const handleGenerateFunction= async(event, prompt) => {
   console.log("inputFiles:", inputFiles)
 
   const result = await executePython(code)
+  result.code = code;
 
   console.log("Execution result:", result);
   return result
 }
 
-const testCode = `
-import os
+const testCode = `import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -52,5 +52,4 @@ df = pd.read_csv("./inputs/ph175_data.csv")
 df.to_csv("./outputs/mock_data.csv", index=False)
 
 df = pd.read_csv("./inputs/ph176_data.csv")
-df.to_csv("./outputs/more_mock_data.csv", index=False)
-`
+df.to_csv("./outputs/more_mock_data.csv", index=False)`
