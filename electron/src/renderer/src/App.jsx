@@ -97,15 +97,10 @@ function App() {
 
                       <div>
                           {images.map((image) => (
-                            <div key={image.path}>
+                            <div key={image.id}>
                               <img
-                                src={`file://${image.path}`}
+                                src={image.url}
                                 alt={image.name}
-                                style={{
-                                  width: "200px",
-                                  height: "200px",
-                                  objectFit: "cover",
-                                }}
                               />
                               <p>{image.name}</p>
                             </div>

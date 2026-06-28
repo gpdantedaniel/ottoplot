@@ -1,12 +1,64 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
 import path, { join } from 'path'
+import * as fs from 'node:fs/promises'
+import { pathToFileURL } from 'node:url'
 import 'dotenv/config'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 // IPC handlers and utilities
 import { handleSelectDataFile } from './ipc/handleSelectDataFile'
 import { handleGenerateFunction } from './ipc/handleGenerateFunction'
-import { handleListImages } from './ipc/handleListImages'
+
+const OUTPUTS_DIR = path.resolve("../workspace/outputs");
+const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]);
+
+const imageMap = new Map();
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "app-image",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      stream: true
+    }
+  }
+]);
+
+const handleListImages = async() => {
+  imageMap.clear();
+
+  const entries = await fs.readdir(OUTPUTS_DIR, { withFileTypes: true });
+
+  const images = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(ext)) continue;
+
+    const absolutePath = path.resolve(OUTPUTS_DIR, entry.name);
+
+    // Prevent path traversal / symlink surprises from escaping the target dir
+    const relative = path.relative(OUTPUTS_DIR, absolutePath);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) continue;
+
+    const id = Buffer.from(entry.name).toString("base64url");
+
+    imageMap.set(id, absolutePath);
+
+    images.push({
+      id,
+      name: entry.name,
+      url: `app-image://workspace/${id}`
+    });
+  }
+
+  return images;
+}
+
 
 function createWindow() {
   // Create the browser window.
@@ -50,6 +102,26 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  protocol.handle("app-image", async (request) => {
+    const url = new URL(request.url);
+
+    if (url.hostname !== "workspace") {
+      return new Response("Not found", { status: 404 });
+    }
+
+    const id = decodeURIComponent(url.pathname.slice(1));
+    const imagePath = imageMap.get(id);
+
+    console.log('id: ', id);
+    console.log('imagePath: ', imagePath);
+
+    if (!imagePath) {
+      return new Response("Not found", { status: 404 });
+    }
+
+    return net.fetch(pathToFileURL(imagePath).toString());
+  });
 
   ipcMain.handle('generate-function', handleGenerateFunction);
   ipcMain.handle("select-data-file", handleSelectDataFile);
