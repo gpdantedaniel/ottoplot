@@ -1,38 +1,18 @@
 import { useState, useEffect} from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { FileSignature, SquareFunction, Upload } from "lucide-react"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 import { Input } from "@/components/ui/input"
-
-import Plot from 'react-plotly.js';
+import { Separator } from "@/components/ui/separator"
 
 function App() {
   const [generationPrompt, setGenerationPrompt] = useState("");
-  const [plotData, setPlotData] = useState(null)
-
-  /*
-  const handleFileChange = async (event) => {
-    const file = event.target.files?.[0];
-    console.log(file);
-    if (!file) { return }
-
-    // console.log("Name:", file.name);
-    // console.log("Size:", file.size);
-    // console.log("Type:", file.type);
-
-    const arrayBuffer = await file.arrayBuffer();
-
-    await window.api.uploadFile({
-      name: file.name,
-      buffer: Array.from(new Uint8Array(arrayBuffer))
-    });
-  };
-  */
+  const [executionOutput, setExecutionOutput] = useState(null)
+  const [images, setImages] = useState([]);
 
   const handleSelectFile = async () => {
     const result = await window.api.selectDataFile();
@@ -40,14 +20,28 @@ function App() {
     console.log(result);
   };
 
+  useEffect(() => {
+    window.api.listImages().then(setImages);
+  }, []);
+
+  console.log(images)
 
   const generateFunction = async () => {
-    const modelOutput = await window.api.generateFunction(generationPrompt)
-    console.log('model_output:', modelOutput);
+
+    const result = await window.api.generateFunction(generationPrompt)
+    setExecutionOutput(result);
+
+    console.log(result);
+    console.log(result.stdout.split("\n"))
+
+    result.stdout.split("\n").forEach((line, index) => {
+      console.log(line, index)
+    })
 
     // Assuming that it is well formatted..
-    setPlotData(JSON.parse(modelOutput.stdout))
+    // setPlotData(JSON.parse(modelOutput.stdout))
   }
+
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -72,7 +66,7 @@ function App() {
             </Button>
 
             <FieldDescription>
-              Select a CSV, JSON, or Excel file
+              Supported files endings: TO BE SPECIFIED
             </FieldDescription>
           </Field>
 
@@ -90,15 +84,39 @@ function App() {
         </div>
         <div className="flex-2 p-8 border-l flex flex-col gap-3">
             <ResizablePanelGroup orientation="vertical">
-              <ResizablePanel defaultSize="75%">
+              <ResizablePanel defaultSize="60%">
 
                 <div className="flex-1 flex flex-col items-start gap-3 py-4">
-                  <h2 className="text-lg">OUTPUT</h2>
-                  { plotData ? (
+                  <h2 className="text-lg">PLOTTING</h2>
+                  { executionOutput ? (
+                    <>
+                      <p>
+                        Execution successful!
+                        
+                      </p>
+
+                      <div>
+                          {images.map((image) => (
+                            <div key={image.path}>
+                              <img
+                                src={`file://${image.path}`}
+                                alt={image.name}
+                                style={{
+                                  width: "200px",
+                                  height: "200px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                              <p>{image.name}</p>
+                            </div>
+                          ))}
+                        </div>
+                        </>
+                      /*
                       <Plot
-                        data={plotData.data}
+                        data={JSON.parse(executionOutput.artifacts[0].payload)}
                         layout={{
-                          ...plotData.layout,
+                          ...JSON.parse(executionOutput.artifacts[0].payload).layout,
                           autosize: true,
                           responsive: true,
 
@@ -108,24 +126,37 @@ function App() {
                           width: "100%",
                           height: "100%",
                         }}
-                        config={FileSignature.config}
                         className="h-full flex-1 h-[800px]"
                       />
+                      */
                     ) : (
                       <div>
-                        Awaiting data...
+                        &gt; Awaiting plots...
                       </div>
+
                     )
                   }
+
                 </div>
-
-
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize="25%">
+              <ResizablePanel defaultSize="40%">
 
                 <div className="flex-1 flex flex-col items-start gap-3 py-4">
-                  <h2 className="text-lg">DEBUGGING</h2>
+                  <h2 className="text-lg">LOGS</h2>
+                  
+                  { executionOutput ? (
+                    <div>
+                      {executionOutput.stdout.split("\n").map((line, index) => (
+                        <p key={index}>&gt; {line}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>&gt; Awaiting logs...</p>
+                  )}
+                  
+
+
                 </div>
                 
               </ResizablePanel>

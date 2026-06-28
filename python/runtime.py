@@ -1,43 +1,30 @@
-import os
 import io
 import json
 import traceback
 import contextlib
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
-import scipy
-import sklearn
-
 import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+matplotlib.use("Agg")
 
 globals_dict = {
     "__builtins__": __builtins__,
     "np": np,
     "pd": pd,
-    "scipy": scipy,
-    "sklearn": sklearn,
     "plt": plt,
 }
-
-locals_dict = {}
 
 def main():
     request = json.load(open(0))
     request_id = request.get("id")
     code = request["code"]
     stdout_buffer = io.StringIO()
-    cwd = Path(os.getcwd())
-
-    inputs_dir = cwd / "inputs"
-    input_files = [f.name for f in inputs_dir.iterdir() if f.is_file()]
 
     try:
         with contextlib.redirect_stdout(stdout_buffer):
-            exec(code, globals_dict, locals_dict)
+            exec(code, globals_dict, {})
             
         response = {
             "id": request_id,

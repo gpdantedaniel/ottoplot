@@ -6,12 +6,13 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 // IPC handlers and utilities
 import { handleSelectDataFile } from './ipc/handleSelectDataFile'
 import { handleGenerateFunction } from './ipc/handleGenerateFunction'
+import { handleListImages } from './ipc/handleListImages'
 
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -50,9 +51,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // Handles generation requests - shows prompt for now
   ipcMain.handle('generate-function', handleGenerateFunction);
   ipcMain.handle("select-data-file", handleSelectDataFile);
+  ipcMain.handle("list-images", handleListImages);
 
   createWindow()
 
