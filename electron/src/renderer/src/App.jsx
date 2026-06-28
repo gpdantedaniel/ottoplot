@@ -9,10 +9,13 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
+import { CsvTableViewer } from './components/csv-table-viewer'
+
 function App() {
   const [generationPrompt, setGenerationPrompt] = useState("");
   const [executionOutput, setExecutionOutput] = useState(null)
   const [images, setImages] = useState([]);
+  const [tablesRefreshKey, setTablesRefreshKey] = useState(0)
 
   const handleSelectFile = async () => {
     const result = await window.api.selectDataFile();
@@ -20,9 +23,15 @@ function App() {
     console.log(result);
   };
 
+  const refreshGeneratedArtifacts = async () => {
+    const currentImages = await window.api.listImages()
+    setImages(currentImages ?? [])
+    setTablesRefreshKey((value) => value + 1)
+  }
+
   useEffect(() => {
-    window.api.listImages().then(setImages);
-  }, []);
+    refreshGeneratedArtifacts()
+  }, [])
 
   console.log(images)
 
@@ -38,8 +47,7 @@ function App() {
       console.log(line, index)
     })
 
-    // Assuming that it is well formatted..
-    // setPlotData(JSON.parse(modelOutput.stdout))
+    await refreshGeneratedArtifacts()
   }
 
 
@@ -92,7 +100,6 @@ function App() {
                     <>
                       <p>
                         Execution successful!
-                        
                       </p>
 
                       <div>
@@ -101,8 +108,8 @@ function App() {
                               <img
                                 src={image.url}
                                 alt={image.name}
+                                width={"600px"}
                               />
-                              <p>{image.name}</p>
                             </div>
                           ))}
                         </div>
@@ -131,6 +138,10 @@ function App() {
 
                     )
                   }
+
+                  <h2 className="text-lg">TABLES</h2>
+
+                  <CsvTableViewer refreshKey={tablesRefreshKey} />
 
                 </div>
               </ResizablePanel>

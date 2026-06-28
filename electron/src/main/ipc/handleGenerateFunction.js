@@ -20,6 +20,7 @@ export const handleGenerateFunction= async(event, prompt) => {
 
 const testCode = `
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # 1. Ensure the output directory exists
@@ -39,40 +40,17 @@ plt.legend()
 plt.grid(True)
 
 plt.savefig('./outputs/my_plot.png', bbox_inches='tight', dpi=300)
+plt.savefig('./outputs/another_plot.png', bbox_inches='tight', dpi=300)
+plt.savefig('./outputs/and_another_one.png', bbox_inches='tight', dpi=300)
+
 plt.close()
 
 print("Graph successfully saved to /output/my_plot.png")
 print("Other diagnostics and whatnot")
 
+df = pd.read_csv("./inputs/ph175_data.csv")
+df.to_csv("./outputs/mock_data.csv", index=False)
+
+df = pd.read_csv("./inputs/ph176_data.csv")
+df.to_csv("./outputs/more_mock_data.csv", index=False)
 `
-
-/*
-const testCode = `
-
-import os
-from pathlib import Path
-import pandas as pd
-
-workspace_dir = Path(os.getcwd())
-inputs_dir = workspace_dir / "inputs"
-
-emit("Loading CSV")
-
-df = pd.read_csv(inputs_dir / "ph175_data.csv")
-
-emit(f"Loaded {len(df)} rows")
-
-import plotly.express as px
-
-fig = px.scatter(df, x="[SA] (% w/v)", y="[CaCl2] (mM)")
-
-emit_artifact("plotly", fig.to_json())
-
-emit_artifact("table", {
-  "columns": ["A", "B"],
-  "rows": [[1, 2], [3, 4]]
-})
-
-print("Debug message")
-`
-*/

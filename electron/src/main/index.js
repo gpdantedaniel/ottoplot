@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
+import { app, shell, BrowserWindow, dialog, ipcMain, protocol, net } from 'electron'
 import path, { join } from 'path'
 import * as fs from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
@@ -10,7 +10,8 @@ import { handleSelectDataFile } from './ipc/handleSelectDataFile'
 import { handleGenerateFunction } from './ipc/handleGenerateFunction'
 
 const OUTPUTS_DIR = path.resolve("../workspace/outputs");
-const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]);
+const ALLOWED_IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]);
+const ALLOWED_TABLE_EXTENSIONS = new Set(['.csv'])
 
 const imageMap = new Map();
 
@@ -37,7 +38,7 @@ const handleListImages = async() => {
     if (!entry.isFile()) continue;
 
     const ext = path.extname(entry.name).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.has(ext)) continue;
+    if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) continue;
 
     const absolutePath = path.resolve(OUTPUTS_DIR, entry.name);
 
@@ -59,6 +60,70 @@ const handleListImages = async() => {
   return images;
 }
 
+function resolveSafeTablePath(fileName) {
+  const resolved = path.resolve(OUTPUTS_DIR, fileName)
+  const ext = path.extname(resolved).toLowerCase()
+
+  if (!resolved.startsWith(OUTPUTS_DIR + path.sep)) {
+    throw new Error('Invalid table path')
+  }
+
+  if (!ALLOWED_TABLE_EXTENSIONS.has(ext)) {
+    throw new Error('Unsupported table type')
+  }
+
+  return resolved
+}
+
+const handleListTables = async () => {
+  const entries = await fs.readdir(OUTPUTS_DIR, { withFileTypes: true })
+
+  const tables = []
+
+  for (const entry of entries) {
+    if (!entry.isFile()) continue
+
+    const ext = path.extname(entry.name).toLowerCase()
+    if (!ALLOWED_TABLE_EXTENSIONS.has(ext)) continue
+
+    const fullPath = resolveSafeTablePath(entry.name)
+    const stat = await fs.stat(fullPath)
+
+    tables.push({
+      id: entry.name,
+      name: entry.name,
+      size: stat.size,
+      modifiedAt: stat.mtime.toISOString()
+    })
+  }
+
+  return tables
+}
+
+const handleReadTable = async (_event, tableId) => {
+  const filePath = resolveSafeTablePath(tableId)
+  return await fs.readFile(filePath, 'utf8')
+}
+
+const handleDownloadTable = async (_event, tableId) => {
+  const sourcePath = resolveSafeTablePath(tableId)
+
+  const result = await dialog.showSaveDialog({
+    defaultPath: tableId,
+    filters: [{ name: 'CSV files', extensions: ['csv'] }]
+  })
+
+  if (result.canceled || !result.filePath) {
+    return { canceled: true }
+  }
+
+  await fs.copyFile(sourcePath, result.filePath)
+
+  return {
+    canceled: false,
+    savedTo: result.filePath
+  }
+}
 
 function createWindow() {
   // Create the browser window.
@@ -126,6 +191,9 @@ app.whenReady().then(() => {
   ipcMain.handle('generate-function', handleGenerateFunction);
   ipcMain.handle("select-data-file", handleSelectDataFile);
   ipcMain.handle("list-images", handleListImages);
+  ipcMain.handle("list-tables", handleListTables);
+  ipcMain.handle("read-table", handleReadTable);
+  ipcMain.handle("download-table", handleDownloadTable);
 
   createWindow()
 
