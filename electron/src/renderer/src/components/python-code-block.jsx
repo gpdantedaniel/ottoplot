@@ -1,6 +1,6 @@
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"
 import python from "react-syntax-highlighter/dist/esm/languages/prism/python"
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
+import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism"
 
 SyntaxHighlighter.registerLanguage("python", python)
 
@@ -8,7 +8,7 @@ export const PythonCodeBlock = ({ code }) => {
   return (
     <SyntaxHighlighter
       language="python"
-      style={oneLight}
+      style={atomDark}
       showLineNumbers
       wrapLongLines={false}
       customStyle={{

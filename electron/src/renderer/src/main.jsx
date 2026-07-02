@@ -15,3 +15,13 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>
 )
+
+/*
+StrictMode>
+  <SidebarProvider>
+    <AppSidebar />
+      <SidebarTrigger/>
+      <App />
+  </SidebarProvider>  
+</StrictMode>
+*/
