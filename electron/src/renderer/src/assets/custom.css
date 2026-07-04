@@ -9,3 +9,18 @@
   border-radius: 0.5rem;
   background: hsl(var(--muted));
 }
+
+/* Sleek white scrollbar for dark panels */
+
+.thin-white-scrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.90) transparent;
+}
+
+.thin-white-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-white-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
