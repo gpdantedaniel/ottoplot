@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { CsvTableViewer } from './components/csv-table-viewer'
 import { PythonCodeBlock } from './components/python-code-block'
 import { FigurePreview } from './components/figure-preview'
+import { LogMessage } from './components/log-message'
 
 function App() {
   const [generationPrompt, setGenerationPrompt] = useState("");
@@ -55,7 +56,7 @@ function App() {
 
 
   return (
-    <div className="w-full h-full flex flex-row">
+    <div className="w-full h-full flex flex-row border-zinc-200 border-t">
       <div className="flex py-4 px-4 flex flex-col gap-4 bg-zinc-100 border-zinc-200">
         <Folder size={28}/>
         <Separator/>
@@ -114,11 +115,11 @@ function App() {
                     { executionOutput ? (
                       <div>
                         {executionOutput.stdout.split("\n").map((line, index) => (
-                          <p key={index}>&gt;  {line}</p>
+                          <p key={index}>&gt; {line}</p>
                         ))}
                       </div>
                     ) : (
-                      <p>&gt; Awaiting logs...</p>
+                      <LogMessage>awaiting results</LogMessage>
                     )}
                   </div>
                 </TabsContent>
@@ -139,9 +140,7 @@ function App() {
                         ))}
                       </>
                     ) : (
-                      <p>
-                        &gt; Awaiting plots...
-                      </p>
+                      <LogMessage>awaiting graphs</LogMessage>
 
                     )
                   }
@@ -158,9 +157,7 @@ function App() {
                     <PythonCodeBlock code={executionOutput.code} />
                     </>
                   ) : (
-                    <p>
-                      &gt; Awaiting code...
-                    </p>
+                    <LogMessage>awaiting code</LogMessage>
                   )}
                 </TabsContent>
               </div>

@@ -131,17 +131,13 @@ function createWindow() {
     width: 1200,
     height: 800,
     show: false,
+
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     },
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#2f3241', // Sets the background color of the title bar
-      symbolColor: '#74b1be', // Sets the color of the minimize/maximize/close buttons
-      height: 40 // Sets the height of the overlay
-    }
+    
   })  
 
   mainWindow.on('ready-to-show', () => {
