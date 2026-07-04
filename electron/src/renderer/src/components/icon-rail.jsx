@@ -1,6 +1,6 @@
 // src/components/icon-rail.jsx
 
-import { Bot, Folder, Settings } from "lucide-react"
+import { Bot, Folders, Settings } from "lucide-react"
 
 import {
   ToggleGroup,
@@ -20,7 +20,7 @@ const navigationItems = [
   {
     value: "workspaces",
     label: "Workspaces",
-    icon: Folder,
+    icon: Folders,
   },
   {
     value: "model",
@@ -76,7 +76,7 @@ export function IconRail({ activeScreen, onScreenChange }) {
                         data-[state=on]:before:opacity-100
                       "
                     >
-                      <Icon size={22} />
+                      <Icon className="size-6" />
                     </ToggleGroupItem>
                   </TooltipTrigger>
 

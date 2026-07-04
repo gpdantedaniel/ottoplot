@@ -1,171 +1,40 @@
-import { useState, useEffect} from 'react'
+import { useState } from "react"
 
-import { Button } from '@/components/ui/button'
-import { Textarea } from "@/components/ui/textarea"
-import { Bot, FileSignature, Folder, Settings, SquareFunction, Upload } from "lucide-react"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-
-import { CsvTableViewer } from './components/csv-table-viewer'
-import { PythonCodeBlock } from './components/python-code-block'
-import { FigurePreview } from './components/figure-preview'
-import { LogMessage } from './components/log-message'
+import { IconRail } from "./components/icon-rail"
+import { WorkspacesScreen } from "./screens/workspaces-screen"
+import { ModelConfigurationScreen } from "./screens/model-configuration-screen"
+import { SettingsScreen } from "./screens/settings-screen"
 
 function App() {
-  const [generationPrompt, setGenerationPrompt] = useState("");
-  const [executionOutput, setExecutionOutput] = useState(null)
-  const [images, setImages] = useState([]);
-  const [tablesRefreshKey, setTablesRefreshKey] = useState(0)
-
-  const handleSelectFile = async () => {
-    const result = await window.api.selectDataFile();
-    if (!result) { return; }
-    console.log(result);
-  };
-
-  const refreshGeneratedArtifacts = async () => {
-    const currentImages = await window.api.listImages()
-    setImages(currentImages ?? [])
-    setTablesRefreshKey((value) => value + 1)
-  }
-
-  useEffect(() => {
-    refreshGeneratedArtifacts()
-  }, [])
-
-  console.log(images)
-
-  const generateFunction = async () => {
-
-    const result = await window.api.generateFunction(generationPrompt)
-    setExecutionOutput(result);
-
-    console.log(result);
-    console.log(result.stdout.split("\n"))
-
-    result.stdout.split("\n").forEach((line, index) => {
-      console.log(line, index)
-    })
-
-    await refreshGeneratedArtifacts()
-  }
-
+  const [activeScreen, setActiveScreen] = useState("workspaces")
 
   return (
-    <div className="w-full h-full flex flex-row border-zinc-200 border-t">
-      <div className="flex py-4 px-4 flex flex-col gap-4 bg-zinc-100 border-zinc-200">
-        <Folder size={28}/>
-        <Separator/>
-        <Bot size={28}/>
-        <Separator/>
-        <Settings size={28}/>
-      </div>
-      <div className="flex border-l py-8 px-8 min-h-0 bg-zinc-50 text-zinc-800 border-zinc-200">
-        <p>Workspaces</p>
-      </div>
-  
-      <div className="flex-1 flex flex-row">
-        <div className="flex-1 p-8 border-l flex flex-col items-start gap-3 bg-white text-zinc-900 border-zinc-200">
-          <Field className="flex flex-col items-start">
-            <FieldLabel>
-              Upload Data
-            </FieldLabel>
+    <div className="flex h-screen w-full flex-row overflow-hidden border-t border-zinc-200">
+      <IconRail
+        activeScreen={activeScreen}
+        onScreenChange={setActiveScreen}
+      />
 
-            <Button type="button" onClick={handleSelectFile}>
-              <Upload/>
-              Select File
-            </Button>
+      <ScreenViewport activeScreen={activeScreen} />
+    </div>
+  )
+}
 
-            <FieldDescription>
-              Supported files endings: TO BE SPECIFIED
-            </FieldDescription>
-          </Field>
+function ScreenViewport({ activeScreen }) {
+  return (
+    <div className="min-w-0 flex-1">
+      <WorkspacesScreen
+        isActive={activeScreen === "workspaces"}
+      />
 
-          <Field>
-            <FieldLabel htmlFor="textarea-message">Function Generation</FieldLabel>
-            <FieldDescription>Described the inputs, operations and outputs of your function.</FieldDescription>
-            <Textarea 
-              id="textarea-message" 
-              placeholder="Type your prompt here."
-              onChange={(e) => setGenerationPrompt(e.target.value)}
-            />
-          </Field>
+      <ModelConfigurationScreen
+        isActive={activeScreen === "model"}
+      />
 
-          <Button onClick={generateFunction}>Generate</Button>
-        </div>
-        <div className="flex-3 min-h-0 p-8 bg-zinc-900 text-zinc-100  flex flex-col h-screen">
-          <Tabs defaultValue="results" className="flex flex-col gap-4 min-h-0">
-            
-            <TabsList variant="line" className="shrink-0 px-0">
-              <TabsTrigger value="results" className="text-lg">RESULTS</TabsTrigger>
-              <TabsTrigger value="graphs" className="text-lg">GRAPHS</TabsTrigger>
-              <TabsTrigger value="tables" className="text-lg">TABLES</TabsTrigger>
-              <TabsTrigger value="code" className="text-lg">CODE</TabsTrigger>
-
-          
-
-            </TabsList>
-              <div className="flex-1 min-h-0 overflow-hidden overflow-y-auto thin-white-scrollbar text-base">
-                <TabsContent value="results" className="text-base">
-                    <div>
-                    { executionOutput ? (
-                      <div>
-                        {executionOutput.stdout.split("\n").map((line, index) => (
-                          <p key={index}>&gt; {line}</p>
-                        ))}
-                      </div>
-                    ) : (
-                      <LogMessage>awaiting results</LogMessage>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="graphs" className="text-base">
-                  
-                  { executionOutput ? (
-                      <>
-                        {images.map((image) => (
-                          <div key={image.id}>
-                            <div className="pb-2">&gt; {image.name}</div>
-                            <FigurePreview
-                              src={image.url}
-                              alt={image.name}
-                              width={"500px"}
-                            />
-                          </div>
-                        ))}
-                      </>
-                    ) : (
-                      <LogMessage>awaiting graphs</LogMessage>
-
-                    )
-                  }
-
-                </TabsContent>
-
-                <TabsContent value="tables" className="text-base">
-                  <CsvTableViewer refreshKey={tablesRefreshKey} />
-                </TabsContent>
-
-                <TabsContent value="code" className="text-base">
-                  { executionOutput ? (
-                    <>
-                    <PythonCodeBlock code={executionOutput.code} />
-                    </>
-                  ) : (
-                    <LogMessage>awaiting code</LogMessage>
-                  )}
-                </TabsContent>
-              </div>
-                
-            </Tabs>
-          </div>
-        </div>
-      </div>
+      <SettingsScreen
+        isActive={activeScreen === "settings"}
+      />
+    </div>
   )
 }
 
