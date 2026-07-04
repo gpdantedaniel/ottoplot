@@ -56,19 +56,19 @@ function App() {
 
   return (
     <div className="w-full h-full flex flex-row">
-      <div className="flex py-4 px-4 flex flex-col gap-4">
+      <div className="flex py-4 px-4 flex flex-col gap-4 bg-zinc-100 border-zinc-200">
         <Folder size={28}/>
         <Separator/>
         <Bot size={28}/>
         <Separator/>
         <Settings size={28}/>
       </div>
-      <div className="flex border-l py-8 px-8 min-h-0">
+      <div className="flex border-l py-8 px-8 min-h-0 bg-zinc-50 text-zinc-800 border-zinc-200">
         <p>Workspaces</p>
       </div>
   
       <div className="flex-1 flex flex-row">
-        <div className="flex-1 p-8 border-l flex flex-col items-start gap-3">
+        <div className="flex-1 p-8 border-l flex flex-col items-start gap-3 bg-white text-zinc-900 border-zinc-200">
           <Field className="flex flex-col items-start">
             <FieldLabel>
               Upload Data
@@ -96,7 +96,7 @@ function App() {
 
           <Button onClick={generateFunction}>Generate</Button>
         </div>
-        <div className="flex-3 min-h-0 p-8 bg-zinc-900 text-white flex flex-col h-screen">
+        <div className="flex-3 min-h-0 p-8 bg-zinc-900 text-zinc-100  flex flex-col h-screen">
           <Tabs defaultValue="results" className="flex flex-col gap-4 min-h-0">
             
             <TabsList variant="line" className="shrink-0 px-0">
@@ -108,13 +108,13 @@ function App() {
           
 
             </TabsList>
-              <div className="flex-1 min-h-0 overflow-hidden overflow-y-auto thin-white-scrollbar">
-                <TabsContent value="results">
+              <div className="flex-1 min-h-0 overflow-hidden overflow-y-auto thin-white-scrollbar text-base">
+                <TabsContent value="results" className="text-base">
                     <div>
                     { executionOutput ? (
-                      <div className="text-base">
+                      <div>
                         {executionOutput.stdout.split("\n").map((line, index) => (
-                          <p key={index}>&gt; {line}</p>
+                          <p key={index}>&gt;  {line}</p>
                         ))}
                       </div>
                     ) : (
@@ -123,11 +123,13 @@ function App() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="graphs" className="m-0">
+                <TabsContent value="graphs" className="text-base">
+                  
                   { executionOutput ? (
-                      <div>
+                      <>
                         {images.map((image) => (
                           <div key={image.id}>
+                            <div className="pb-2">&gt; {image.name}</div>
                             <FigurePreview
                               src={image.url}
                               alt={image.name}
@@ -135,29 +137,30 @@ function App() {
                             />
                           </div>
                         ))}
-                      </div>
+                      </>
                     ) : (
-                      <div>
+                      <p>
                         &gt; Awaiting plots...
-                      </div>
+                      </p>
 
                     )
                   }
 
                 </TabsContent>
 
-                <TabsContent value="tables">
+                <TabsContent value="tables" className="text-base">
                   <CsvTableViewer refreshKey={tablesRefreshKey} />
                 </TabsContent>
 
-                <TabsContent value="code">
+                <TabsContent value="code" className="text-base">
                   { executionOutput ? (
                     <>
                     <PythonCodeBlock code={executionOutput.code} />
-                    <PythonCodeBlock code={executionOutput.code} />
                     </>
                   ) : (
-                    <></>
+                    <p>
+                      &gt; Awaiting code...
+                    </p>
                   )}
                 </TabsContent>
               </div>

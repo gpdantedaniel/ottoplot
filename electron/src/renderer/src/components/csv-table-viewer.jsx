@@ -81,7 +81,7 @@ export function CsvTableViewer({ refreshKey }) {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 25,
+        pageSize: 30,
       },
     },
   })
@@ -103,7 +103,7 @@ export function CsvTableViewer({ refreshKey }) {
     <div className="w-full h-full flex flex-col gap-3">
       <div className="flex flex-row items-center gap-2">
         <select
-          className="border rounded-md px-3 py-2 text-sm bg-background max-w-[360px]"
+          className="border rounded-md px-3 py-2 text-sm max-w-[360px]"
           value={selectedTableId}
           onChange={(event) => setSelectedTableId(event.target.value)}
         >
@@ -116,7 +116,6 @@ export function CsvTableViewer({ refreshKey }) {
 
         <Button
           type="button"
-          variant="outline"
           onClick={handleDownload}
           disabled={!selectedTableId}
         >
@@ -125,7 +124,6 @@ export function CsvTableViewer({ refreshKey }) {
 
         <Button
           type="button"
-          variant="outline"
           onClick={loadTables}
         >
           Refresh
@@ -142,13 +140,13 @@ export function CsvTableViewer({ refreshKey }) {
 
       {!loading && rows.length > 0 && (
         <>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm">
             Showing {table.getRowModel().rows.length} rows on this page. Total rows: {rows.length}.
           </div>
 
           <div className="border rounded-md overflow-auto max-h-[520px] w-full">
             <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0 bg-background z-10">
+              <thead className="sticky top-0 z-1 bg-background text-black border-b border-b-white">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
@@ -191,7 +189,6 @@ export function CsvTableViewer({ refreshKey }) {
           <div className="flex flex-row items-center gap-2">
             <Button
               type="button"
-              variant="outline"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -205,7 +202,7 @@ export function CsvTableViewer({ refreshKey }) {
 
             <Button
               type="button"
-              variant="outline"
+
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >

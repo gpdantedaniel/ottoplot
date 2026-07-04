@@ -11,12 +11,8 @@ export const PythonCodeBlock = ({ code }) => {
       style={atomDark}
       showLineNumbers
       wrapLongLines={false}
+      className="text-sm"
       customStyle={{
-        margin: 0,
-        padding: 0,
-        borderRadius: "0",
-        fontSize: "0.875rem",
-        lineHeight: 1.5,
         background: "transparent"
       }}
     >
